@@ -1,0 +1,314 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Main {
+
+    static final double SALARIO_BASE = 2000.00;
+
+    static Scanner scanner = new Scanner(System.in);
+    static ArrayList<Colaborador> colaboradores = new ArrayList<>();
+
+    public static void main(String[] args) {
+
+        int opcao;
+
+        do {
+            exibirMenu();
+            opcao = lerInteiro("Escolha uma opção: ");
+
+            switch (opcao) {
+                case 1:
+                    cadastrarFuncionarioPadrao();
+                    break;
+
+                case 2:
+                    cadastrarFuncionarioComissionado();
+                    break;
+
+                case 3:
+                    cadastrarFuncionarioProducao();
+                    break;
+
+                case 4:
+                    gerarFolhaPagamento();
+                    break;
+
+                case 0:
+                    System.out.println("Programa encerrado com sucesso.");
+                    break;
+
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
+
+        } while (opcao != 0);
+
+        scanner.close();
+    }
+
+    public static void exibirMenu() {
+        System.out.println("\n========== SISTEMA DE FOLHA DE PAGAMENTO ==========");
+        System.out.println("1 - Cadastrar Funcionário Padrão");
+        System.out.println("2 - Cadastrar Funcionário Comissionado");
+        System.out.println("3 - Cadastrar Funcionário Produção");
+        System.out.println("4 - Gerar Folha de Pagamento");
+        System.out.println("0 - Sair do Programa");
+        System.out.println("===================================================");
+    }
+
+    public static void cadastrarFuncionarioPadrao() {
+        System.out.println("\n--- Cadastro de Funcionário Padrão ---");
+
+        String nome = lerTextoObrigatorio("Nome: ");
+        int matricula = lerMatriculaUnica();
+
+        Colaborador colaborador = new Colaborador(matricula, nome, "Padrão");
+
+        colaboradores.add(colaborador);
+
+        System.out.println("Funcionário padrão cadastrado com sucesso!");
+    }
+
+    public static void cadastrarFuncionarioComissionado() {
+        System.out.println("\n--- Cadastro de Funcionário Comissionado ---");
+
+        String nome = lerTextoObrigatorio("Nome: ");
+        int matricula = lerMatriculaUnica();
+
+        double vendas = lerDoubleNaoNegativo("Informe valor das vendas: ");
+        double percentualComissao = lerDoubleNaoNegativo("Informe comissão percentual: ");
+
+        Colaborador colaborador = new Colaborador(matricula, nome, "Comissionado");
+        colaborador.setVendas(vendas);
+        colaborador.setPercentualComissao(percentualComissao);
+
+        colaboradores.add(colaborador);
+
+        System.out.println("Funcionário comissionado cadastrado com sucesso!");
+    }
+
+    public static void cadastrarFuncionarioProducao() {
+        System.out.println("\n--- Cadastro de Funcionário de Produção ---");
+
+        String nome = lerTextoObrigatorio("Nome: ");
+        int matricula = lerMatriculaUnica();
+
+        int quantidadeProduzida = lerInteiroNaoNegativo("Informe qtde de peças: ");
+        double valorPorPeca = lerDoubleNaoNegativo("Informe valor da peça: ");
+
+        Colaborador colaborador = new Colaborador(matricula, nome, "Produção");
+        colaborador.setQuantidadeProduzida(quantidadeProduzida);
+        colaborador.setValorPorPeca(valorPorPeca);
+
+        colaboradores.add(colaborador);
+
+        System.out.println("Funcionário de produção cadastrado com sucesso!");
+    }
+
+    public static void gerarFolhaPagamento() {
+        System.out.println("\n========== FOLHA DE PAGAMENTO ==========");
+
+        if (colaboradores.isEmpty()) {
+            System.out.println("Nenhum colaborador cadastrado.");
+            return;
+        }
+
+        System.out.println("Total de pessoas cadastradas: " + colaboradores.size());
+
+        for (Colaborador colaborador : colaboradores) {
+            colaborador.exibirDados(SALARIO_BASE);
+        }
+    }
+
+    public static String lerTextoObrigatorio(String mensagem) {
+        String texto;
+
+        do {
+            System.out.print(mensagem);
+            texto = scanner.nextLine().trim();
+
+            if (texto.isEmpty()) {
+                System.out.println("O campo não pode ficar vazio.");
+            }
+
+        } while (texto.isEmpty());
+
+        return texto;
+    }
+
+    public static int lerMatriculaUnica() {
+        int matricula;
+        boolean existe;
+
+        do {
+            matricula = lerInteiroPositivo("Matrícula: ");
+            existe = verificarMatriculaExistente(matricula);
+
+            if (existe) {
+                System.out.println("Essa matrícula já está cadastrada. Informe outra.");
+            }
+
+        } while (existe);
+
+        return matricula;
+    }
+
+    public static boolean verificarMatriculaExistente(int matricula) {
+        for (Colaborador colaborador : colaboradores) {
+            if (colaborador.getMatricula() == matricula) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static int lerInteiro(String mensagem) {
+        while (true) {
+            try {
+                System.out.print(mensagem);
+                return Integer.parseInt(scanner.nextLine().trim());
+            } catch (NumberFormatException erro) {
+                System.out.println("Valor inválido. Digite um número inteiro.");
+            }
+        }
+    }
+
+    public static int lerInteiroPositivo(String mensagem) {
+        int valor;
+
+        do {
+            valor = lerInteiro(mensagem);
+
+            if (valor <= 0) {
+                System.out.println("O valor deve ser maior que zero.");
+            }
+
+        } while (valor <= 0);
+
+        return valor;
+    }
+
+    public static int lerInteiroNaoNegativo(String mensagem) {
+        int valor;
+
+        do {
+            valor = lerInteiro(mensagem);
+
+            if (valor < 0) {
+                System.out.println("O valor não pode ser negativo.");
+            }
+
+        } while (valor < 0);
+
+        return valor;
+    }
+
+    public static double lerDoubleNaoNegativo(String mensagem) {
+        double valor;
+
+        while (true) {
+            try {
+                System.out.print(mensagem);
+
+                String entrada = scanner.nextLine().trim();
+                entrada = entrada.replace(",", ".");
+
+                valor = Double.parseDouble(entrada);
+
+                if (valor < 0) {
+                    System.out.println("O valor não pode ser negativo.");
+                } else {
+                    return valor;
+                }
+
+            } catch (NumberFormatException erro) {
+                System.out.println("Valor inválido. Digite um número válido.");
+            }
+        }
+    }
+}
+
+class Colaborador {
+
+    private int matricula;
+    private String nome;
+    private String tipo;
+
+    private double vendas;
+    private double percentualComissao;
+
+    private int quantidadeProduzida;
+    private double valorPorPeca;
+
+    public Colaborador(int matricula, String nome, String tipo) {
+        this.matricula = matricula;
+        this.nome = nome;
+        this.tipo = tipo;
+    }
+
+    public int getMatricula() {
+        return matricula;
+    }
+
+    public void setVendas(double vendas) {
+        this.vendas = vendas;
+    }
+
+    public void setPercentualComissao(double percentualComissao) {
+        this.percentualComissao = percentualComissao;
+    }
+
+    public void setQuantidadeProduzida(int quantidadeProduzida) {
+        this.quantidadeProduzida = quantidadeProduzida;
+    }
+
+    public void setValorPorPeca(double valorPorPeca) {
+        this.valorPorPeca = valorPorPeca;
+    }
+
+    public double calcularComissao() {
+        return vendas * percentualComissao / 100;
+    }
+
+    public double calcularProdutividade() {
+        return valorPorPeca * quantidadeProduzida;
+    }
+
+    public double calcularExtras() {
+        if (tipo.equalsIgnoreCase("Comissionado")) {
+            return calcularComissao();
+        } else if (tipo.equalsIgnoreCase("Produção")) {
+            return calcularProdutividade();
+        } else {
+            return 0;
+        }
+    }
+
+    public double calcularSalarioFinal(double salarioBase) {
+        return salarioBase + calcularExtras();
+    }
+
+    public void exibirDados(double salarioBase) {
+        System.out.println("\n----------------------------------------");
+        System.out.println("Nome: " + nome);
+        System.out.println("Matrícula: " + matricula);
+        System.out.println("Tipo: " + tipo);
+        System.out.println("Salário Fixo: R$ " + String.format("%.2f", salarioBase));
+
+        if (tipo.equalsIgnoreCase("Comissionado")) {
+            System.out.println("Vendas: R$ " + String.format("%.2f", vendas));
+            System.out.println("Percentual de comissão: " + String.format("%.2f", percentualComissao) + "%");
+            System.out.println("Comissão: R$ " + String.format("%.2f", calcularComissao()));
+        } else if (tipo.equalsIgnoreCase("Produção")) {
+            System.out.println("Quantidade produzida: " + quantidadeProduzida);
+            System.out.println("Valor por peça: R$ " + String.format("%.2f", valorPorPeca));
+            System.out.println("Produtividade: R$ " + String.format("%.2f", calcularProdutividade()));
+        } else {
+            System.out.println("Extras: R$ 0,00");
+        }
+
+        System.out.println("Salário final: R$ " + String.format("%.2f", calcularSalarioFinal(salarioBase)));
+        System.out.println("----------------------------------------");
+    }
+}
